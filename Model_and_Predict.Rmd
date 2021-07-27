@@ -1,0 +1,142 @@
+---
+title: "Models and Predictions for Hit/Miss POD Data"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+  word_document: default
+---
+
+Choose one of the four distributions.
+```{r}
+Distribution="Log_Log"
+#Distribution="Weib_Log"
+#Distribution="Weib_Weib"
+#Distribution="Unif_Unif"
+
+```
+
+Input the combination(s) of overlap, evenness and sample size (n) at which to predict the percent bias. 
+```{r}
+# Input a vector c(0,1,2) or a value.
+  # Overlap should be between 0 and 0.7
+  # Evenness should be between 0 and 0.5
+  # n is sample size
+
+n        = c(60, 60)  
+overlap  = c(0.36667, 0.36667)
+evenness = c(0.16667, 0.5)
+CI = "all" # "LR", "MLR", "Std. Wald", "Mod. Wald"
+
+```
+
+Set folder to the location where the github files are saved. 
+```{r}
+folder = "C:/Users/chriz/GitRepositories/HitMissPaperData/"
+```
+
+Predicted Percent Bias in a9095 Estimation (uses Likelihood Ratio for Calculating a9095):
+```{r, warning=FALSE, echo=FALSE}
+source(paste(folder,"predict_a9095_percent_bias.R",sep=""))
+source(paste(folder,"getPredictedBiasPerCI.R",sep=""))
+
+
+if(CI=="all"){
+  load(paste(folder,Distribution,"_a9095_Percent_Bias_Models_ModWald.RData", sep=""))
+  load(paste(folder,Distribution,"_a9095_Percent_Bias_Models_StdWald.RData", sep=""))
+  load(paste(folder,Distribution,"_a9095_Percent_Bias_Models_LR.RData", sep=""))
+  load(paste(folder,Distribution,"_a9095_Percent_Bias_Models_MLR.RData", sep=""))
+  }else{
+  LoadLocation = switch(
+    CI,
+    "Mod. Wald"  = paste(folder,Distribution,"_a9095_Percent_Bias_Models_ModWald.RData", sep=""),
+    "Std. Wald"  = paste(folder,Distribution,"_a9095_Percent_Bias_Models_StdWald.RData", sep=""),
+    "LR"         = paste(folder,Distribution,"_a9095_Percent_Bias_Models_LR.RData", sep=""),
+    "MLR"        = paste(folder,Distribution,"_a9095_Percent_Bias_Models_MLR.RData", sep="")
+  )
+  load(LoadLocation)
+}
+
+if(CI=="Mod. Wald"|CI=="all"){
+  print(paste("The Model for Percent Bias in a9095 for",Distribution, 
+              "using a Standard Wald Confidence Interval for a9095 is as follows:"))
+  summary(a9095.Wald.old.boxcox.perc)
+}
+if(CI=="Std. Wald"|CI=="all"){
+  print(paste("The Model for Percent Bias in a9095 for",Distribution, 
+            "using a Modified Wald Confidence Interval for a9095 is as follows:"))
+  summary(a9095.Wald.boxcox.perc)
+}
+if(CI=="LR"|CI=="all"){
+  print(paste("The Model for Percent Bias in a9095 for",Distribution, 
+            "using a Likelihood Ratio Confidence Interval for a9095 is as follows:"))
+  summary(a9095.LR.boxcox.perc)
+}  
+if(CI=="MLR"|CI=="all"){
+  print(paste("The Model for Percent Bias in a9095 for",Distribution, 
+            "using a Modified Likelihood Ratio Confidence Interval for a9095 is as follows:"))
+  summary(a9095.MLR.boxcox.perc)
+}
+
+(predicted_a9095_percent_bias = predict_a9095_percent_bias(folder, Distribution, overlap, evenness, n, CI))
+
+```
+
+Predict Probability of a9095 not existing (uses Likelihood Ratio for Calculating a9095):
+```{r, warning=FALSE, echo=FALSE}
+source(paste(folder,"predict_a9095_risk.R",sep=""))
+source(paste(folder,"getPredictedExistencePerCI.R",sep=""))
+
+if(CI=="all"){
+  load(paste(folder,Distribution,"_a9095_Probability_of_Not_Existing_ModWald.RData", sep=""))
+  load(paste(folder,Distribution,"_a9095_Probability_of_Not_Existing_StdWald.RData", sep=""))
+  load(paste(folder,Distribution,"_a9095_Probability_of_Not_Existing_LR.RData", sep=""))
+  load(paste(folder,Distribution,"_a9095_Probability_of_Not_Existing_MLR.RData", sep=""))
+  }else{
+  LoadLocation = switch(
+    CI,
+    "Mod. Wald"  = paste(folder,Distribution,"_a9095_Probability_of_Not_Existing_ModWald.RData", sep=""),
+    "Std. Wald"  = paste(folder,Distribution,"_a9095_Probability_of_Not_Existing_StdWald.RData", sep=""),
+    "LR"         = paste(folder,Distribution,"_a9095_Probability_of_Not_Existing_LR.RData", sep=""),
+    "MLR"        = paste(folder,Distribution,"_a9095_Probability_of_Not_Existing_MLR.RData", sep="")
+  )
+  load(LoadLocation)
+}
+
+
+
+if(CI=="Mod. Wald"|CI=="all"){
+  print(paste("The Model for probability of a9095 not existing when using a standard Wald  confidence interval for a9095 and for",Distribution, "is as follows:"))
+  summary(Wald.old.a9095.exist)
+}
+if(CI=="Std. Wald"|CI=="all"){
+  print(paste("The Model for probability of a9095 not existing when using a modified Wald     confidence interval for a9095 and for",Distribution, "is as follows:"))
+  summary(Wald.a9095.exist)
+}
+if(CI=="LR"|CI=="all"){
+  print(paste("The Model for probability of a9095 not existing when using a Likelihood Ratio   confidence interval for a9095 and for",Distribution, "is as follows:"))
+  summary(LR.a9095.exist)
+}  
+if(CI=="MLR"|CI=="all"){
+  print(paste("The Model for probability of a9095 not existing when using a Modified Likelihood Ratio confidence interval for a9095 and for",Distribution, "is as follows:"))
+  summary(MLR.a9095.exist)
+}
+
+(predicted_a9095_risk_not_exist = predict_a9095_risk(folder, Distribution, overlap, evenness, n, CI))
+
+```
+
+
+Predicted Percent Bias in a90 Estimation:
+```{r, warning=FALSE, echo=FALSE}
+source(paste(folder,"predict_a90_percent_bias.R",sep=""))
+
+load(paste(folder,Distribution,"_a90_Percent_Bias_Models.RData", sep=""))
+
+print(paste("The Model for Percent Bias in a90 for",Distribution, "is as follows:"))
+summary(a90.Wald.boxcox.perc)
+
+(predicted_a90_percent_bias = predict_a90_percent_bias(folder, Distribution, overlap, evenness, n))
+
+```
